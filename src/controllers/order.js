@@ -1,3 +1,5 @@
+/** @format */
+
 const Order = require("../models/order");
 const Cart = require("../models/cart");
 const Address = require("../models/address");
@@ -6,9 +8,8 @@ exports.addOrder = (req, res) => {
   Cart.deleteOne({ user: req.user._id }).exec((error, result) => {
     if (error) return res.status(400).json({ error });
     if (result) {
-      const {body} = req;
-      // req.body.user = req.user._id;
-      console.log(req.user._id);
+      const { body } = req;
+
       let orderStatus = [
         {
           type: "ordered",
@@ -34,22 +35,26 @@ exports.addOrder = (req, res) => {
           date: new Date(),
           isCanclled: false,
         },
-       
       ];
-    let items = body.items.map(newItem => {
-      removeOrder = [
-        {
-          type: "removed",
-          date: new Date(),
-          isRemoveOrder: false,
-        },
-       
-      ];
-      return {...newItem, removeOrder}
-    })
-    
-      const userId = req.user._id
-      const order = new Order({...body, user: userId, items, cancleOrder, orderStatus});
+      let items = body.items.map((newItem) => {
+        removeOrder = [
+          {
+            type: "removed",
+            date: new Date(),
+            isRemoveOrder: false,
+          },
+        ];
+        return { ...newItem, removeOrder };
+      });
+
+      const userId = req.user._id;
+      const order = new Order({
+        ...body,
+        user: userId,
+        items,
+        cancleOrder,
+        orderStatus,
+      });
       // res.send(items);
       order.save((error, order) => {
         if (error) return res.status(400).json({ error });
@@ -61,7 +66,6 @@ exports.addOrder = (req, res) => {
     }
   });
 };
-
 
 exports.getOrders = (req, res) => {
   Order.find({ user: req.user._id })
@@ -94,24 +98,30 @@ exports.getOrder = (req, res) => {
           res.status(200).json({
             order,
           });
-     
         });
       }
     });
 };
-exports.cancleOrders = async(req, res) => {
-  try{
-  const customerOrder = await Order.findById(req.body.orderId);
-  const itemIndx = customerOrder.items.findIndex(orderItem=>orderItem.productId.toString()===req.body.productId)
-  if(itemIndx===-1){
-  return res.status(400).json({error:'No Peoduct found'})
-  }
-  customerOrder.items[itemIndx].removeOrder[0].isRemoveOrder=true
-  customerOrder.items[itemIndx].removeOrder[0].date = new Date();
-  const updateOrder= await Order.findOneAndUpdate({_id:req.body.orderId}, { items: customerOrder.items } ,{useFindAndModify: false})
-  if(!updateOrder) return res.status(400).json({message:'Order not cancel'})
-  return res.status(201).json(updateOrder)
-  }catch(e){
-    return res.status(400).json({error:e})
+exports.cancleOrders = async (req, res) => {
+  try {
+    const customerOrder = await Order.findById(req.body.orderId);
+    const itemIndx = customerOrder.items.findIndex(
+      (orderItem) => orderItem.productId.toString() === req.body.productId
+    );
+    if (itemIndx === -1) {
+      return res.status(400).json({ error: "No Peoduct found" });
+    }
+    customerOrder.items[itemIndx].removeOrder[0].isRemoveOrder = true;
+    customerOrder.items[itemIndx].removeOrder[0].date = new Date();
+    const updateOrder = await Order.findOneAndUpdate(
+      { _id: req.body.orderId },
+      { items: customerOrder.items },
+      { useFindAndModify: false }
+    );
+    if (!updateOrder)
+      return res.status(400).json({ message: "Order not cancel" });
+    return res.status(201).json(updateOrder);
+  } catch (e) {
+    return res.status(400).json({ error: e });
   }
 };

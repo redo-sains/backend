@@ -52,6 +52,7 @@ exports.createProduct = (req, res) => {
     X2L_size,
     X3L_size,
     productPictures,
+    category,
   } = req.body.products;
 
   // if (req.files.length > 0) {
@@ -87,6 +88,7 @@ exports.createProduct = (req, res) => {
     description,
     color,
     productPictures,
+    category,
     skuCode,
   });
 
